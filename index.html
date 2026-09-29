@@ -10,7 +10,9 @@ h1{margin:0 0 16px}
 .card{background:#fff;border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 label{font-weight:600}
 input{font-size:16px;padding:8px;border:1px solid #ccd;border-radius:8px;width:110px}
-input.name{width:170px}
+input.name{flex:1;min-width:0;width:auto}
+#list .row input[type=number]{width:90px}
+#list .row{flex-wrap:nowrap}
 .row{display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap}
 .row button{background:none;border:none;color:#c33;font-size:18px;cursor:pointer}
 .add{background:#3b6cf6;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:15px;cursor:pointer;margin-top:6px}
@@ -21,7 +23,7 @@ input.name{width:170px}
 .bar div{height:100%;background:#3b6cf6}
 small{color:#667}
 </style></head><body><div class="wrap">
-<h1>💵 My Monthly Budget</h1>
+<h1 style="font-size:26px">💵 My Monthly Budget</h1>
 <div class="card"><label>Weekly pay</label><div class="row">$<input id="weekly" type="number" inputmode="decimal" placeholder="0"> per week</div><small id="incNote"></small><input id="income" type="hidden"></div>
 <div class="card"><label>Monthly bills</label><div id="list"></div><button class="add" onclick="addRow('',0)">+ Add bill</button></div>
 <div class="card"><label>Debt</label><div class="row">Owed: $<input id="debt" type="number"> Paying $<input id="debtPay" type="number"> /mo</div><small id="debtMsg"></small></div>
