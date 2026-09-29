@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Budget</title>
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Budget"><meta name="theme-color" content="#3b6cf6">
+<style>
+body{font-family:system-ui,sans-serif;background:#f4f6fb;margin:0;padding:20px;color:#1d2330}
+.wrap{max-width:560px;margin:auto}
+h1{margin:0 0 16px}
+.card{background:#fff;border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+label{font-weight:600}
+input{font-size:16px;padding:8px;border:1px solid #ccd;border-radius:8px;width:110px}
+input.name{width:170px}
+.row{display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap}
+.row button{background:none;border:none;color:#c33;font-size:18px;cursor:pointer}
+.add{background:#3b6cf6;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:15px;cursor:pointer;margin-top:6px}
+.sum{display:flex;justify-content:space-between;font-size:18px;margin:6px 0}
+.left{font-size:26px;font-weight:700}
+.pos{color:#1a8a4a}.neg{color:#c33}
+.bar{height:10px;background:#e6e9f2;border-radius:6px;overflow:hidden;margin-top:10px}
+.bar div{height:100%;background:#3b6cf6}
+small{color:#667}
+</style></head><body><div class="wrap">
+<h1>💵 My Monthly Budget</h1>
+<div class="card"><label>Weekly pay</label><div class="row">$<input id="weekly" type="number" inputmode="decimal" placeholder="0"> per week</div><small id="incNote"></small><input id="income" type="hidden"></div>
+<div class="card"><label>Monthly bills</label><div id="list"></div><button class="add" onclick="addRow('',0)">+ Add bill</button></div>
+<div class="card"><label>Debt</label><div class="row">Owed: $<input id="debt" type="number"> Paying $<input id="debtPay" type="number"> /mo</div><small id="debtMsg"></small></div>
+<div class="card">
+<div class="sum"><span>Income</span><span id="sIn">$0</span></div>
+<div class="sum"><span>Bills</span><span id="sOut">$0</span></div>
+<div class="sum"><span>Left over</span><span id="sLeft" class="left">$0</span></div>
+<div class="bar"><div id="bar"></div></div><small id="pct"></small>
+</div>
+<small>Everything saves automatically on this device.</small>
+</div>
+<script>
+const defaults={weekly:"",debt:"",debtPay:"",bills:[["Car payment 1",""],["Car payment 2",""],["Insurance",""],["Phone",""],["Gas",""]]};
+let d=JSON.parse(localStorage.getItem("budget2")||"null")||defaults;
+const $=id=>document.getElementById(id),fmt=n=>(n<0?"-$":"$")+Math.abs(Math.round(n)).toLocaleString();
+function addRow(n,a){const r=document.createElement("div");r.className="row";
+r.innerHTML=`<input class="name" value="${n}" placeholder="Bill name"> $<input type="number" inputmode="decimal" placeholder="0" value="${a}"><button title="Remove">✕</button>`;
+r.querySelector("button").onclick=()=>{r.remove();calc()};r.querySelectorAll("input").forEach(i=>i.oninput=calc);$("list").appendChild(r);calc()}
+function calc(){const bills=[...$("list").children].map(r=>{const i=r.querySelectorAll("input");return[i[0].value,+i[1].value||0]});
+const inc=Math.round((+$("weekly").value||0)*52/12);$("incNote").textContent="About "+fmt(inc)+" a month (52 weeks ÷ 12)",dp=+$("debtPay").value||0,debt=+$("debt").value||0;
+const out=bills.reduce((s,b)=>s+b[1],0)+dp,left=inc-out;
+$("sIn").textContent=fmt(inc);$("sOut").textContent=fmt(out);
+$("sLeft").textContent=fmt(left);$("sLeft").className="left "+(left>=0?"pos":"neg");
+$("bar").style.width=inc?Math.min(100,out/inc*100)+"%":"0";$("pct").textContent=inc?Math.round(out/inc*100)+"% of income goes to bills":"Add your weekly pay to see what's left";
+$("debtMsg").textContent=debt&&dp?`Paid off in about ${Math.ceil(debt/dp)} month(s)`:debt?"Add a monthly payment to see a payoff date":"";
+localStorage.setItem("budget2",JSON.stringify({weekly:$("weekly").value,debt:$("debt").value,debtPay:$("debtPay").value,bills}))}
+$("weekly").value=d.weekly;$("debt").value=d.debt;$("debtPay").value=d.debtPay;
+["weekly","debt","debtPay"].forEach(i=>$(i).oninput=calc);d.bills.forEach(b=>addRow(b[0],b[1]));calc();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+</script></body></html>
